@@ -1,10 +1,23 @@
+using Microsoft.Extensions.Options;
+using OpenAI;
+using SmartFAQAssistantApi.Settings;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
 builder.Services.AddOpenApi();
+
+builder.Services.Configure<OpenAISettings>(builder.Configuration.GetSection("OpenAISettings"));
+builder.Services.Configure<Qdrantsettings>(builder.Configuration.GetSection("Qdrantsettings"));
+
+builder.Services.AddSingleton<OpenAIClient>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<OpenAISettings>>().Value;
+    return new OpenAIClient(settings.ApiKey);
+});
 
 var app = builder.Build();
 
